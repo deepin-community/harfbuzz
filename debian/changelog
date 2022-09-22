@@ -1,0 +1,11 @@
+harfbuzz (2.7.4-deepin) UNRELEASED; urgency=medium
+
+  * update
+
+ -- Deepin Developer <deepin-dev@deepin.org>  Fri, 12 Aug 2022 11:46:15 +0800
+
+harfbuzz (2.7.4-deepin) stable; urgency=medium
+
+  * ['Rebuild  against by  current gcc 11.2']
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 11 Aug 2022 21:58:10 +0800
