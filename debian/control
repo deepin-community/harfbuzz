@@ -3,12 +3,13 @@ Section: libs
 Priority: optional
 Maintainer: أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>
 Uploaders: Emilio Pozuelo Monfort <pochu@debian.org>
-Standards-Version: 4.6.2
+Standards-Version: 4.7.0
 Build-Depends:
  debhelper-compat (= 13),
  dh-sequence-gir,
+ gir1.2-freetype2-2.0-dev,
+ gir1.2-gobject-2.0-dev,
  meson (>= 0.55),
- pkg-config,
  libglib2.0-dev,
  libcairo2-dev,
  libchafa-dev,
@@ -17,8 +18,9 @@ Build-Depends:
  libgraphite2-dev,
  libgirepository1.0-dev,
  gtk-doc-tools,
+ dh-sequence-movetousr,
 Rules-Requires-Root: no
-Homepage: https://www.freedesktop.org/wiki/Software/HarfBuzz
+Homepage: https://harfbuzz.github.io/
 Vcs-Git: https://salsa.debian.org/freedesktop-team/harfbuzz.git
 Vcs-Browser: https://salsa.debian.org/freedesktop-team/harfbuzz
 
@@ -72,6 +74,7 @@ Architecture: any
 Multi-Arch: same
 Section: libdevel
 Depends:
+ ${gir:Depends},
  ${misc:Depends},
  libharfbuzz0b (= ${binary:Version}),
  libharfbuzz-icu0 (= ${binary:Version}),
@@ -83,6 +86,7 @@ Depends:
  libgraphite2-dev,
  libicu-dev,
  libfreetype-dev,
+Provides: ${gir:Provides},
 Description: Development files for OpenType text shaping engine
  HarfBuzz is an implementation of the OpenType Layout engine (aka layout
  engine) and the script-specific logic (aka shaping engine).
