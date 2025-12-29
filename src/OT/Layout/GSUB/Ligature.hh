@@ -19,7 +19,6 @@ struct Ligature
                                          * in writing direction */
   public:
   DEFINE_SIZE_ARRAY (Types::size + 2, component);
-  DEFINE_SIZE_MAX (65536 * Types::HBGlyphID::static_size);
 
   bool sanitize (hb_sanitize_context_t *c) const
   {
@@ -43,6 +42,18 @@ struct Ligature
   {
     c->input->add_array (component.arrayZ, component.get_length ());
     c->output->add (ligGlyph);
+  }
+
+  template <typename set_t>
+  void collect_second (set_t &s) const
+  {
+    if (unlikely (!component.get_length ()))
+    {
+      // A ligature without any components. Anything matches.
+      s = set_t::full ();
+      return;
+    }
+    s.add (component.arrayZ[0]);
   }
 
   bool would_apply (hb_would_apply_context_t *c) const
@@ -91,15 +102,14 @@ struct Ligature
 
     unsigned int total_component_count = 0;
 
+    if (unlikely (count > HB_MAX_CONTEXT_LENGTH)) return false;
     unsigned int match_end = 0;
-    unsigned int match_positions[HB_MAX_CONTEXT_LENGTH];
 
     if (likely (!match_input (c, count,
                               &component[1],
                               match_glyph,
                               nullptr,
                               &match_end,
-                              match_positions,
                               &total_component_count)))
     {
       c->buffer->unsafe_to_concat (c->buffer->idx, match_end);
@@ -119,10 +129,10 @@ struct Ligature
       match_end += delta;
       for (unsigned i = 0; i < count; i++)
       {
-	match_positions[i] += delta;
+	c->match_positions[i] += delta;
 	if (i)
 	  *p++ = ',';
-	snprintf (p, sizeof(buf) - (p - buf), "%u", match_positions[i]);
+	snprintf (p, sizeof(buf) - (p - buf), "%u", c->match_positions[i]);
 	p += strlen(p);
       }
 
@@ -133,7 +143,6 @@ struct Ligature
 
     ligate_input (c,
                   count,
-                  match_positions,
                   match_end,
                   ligGlyph,
                   total_component_count);

@@ -55,8 +55,8 @@ static void free_up (void *p)
 {
   data_t *data = (data_t *) p;
 
-  g_assert (data->value == MAGIC0 || data->value == MAGIC1);
-  g_assert (!data->freed);
+  g_assert_true (data->value == MAGIC0 || data->value == MAGIC1);
+  g_assert_true (!data->freed);
   data->freed = TRUE;
 }
 
@@ -67,9 +67,9 @@ simple_get_script (hb_unicode_funcs_t *ufuncs,
 {
   data_t *data = (data_t *) user_data;
 
-  g_assert (hb_unicode_funcs_get_parent (ufuncs) != NULL);
+  g_assert_true (hb_unicode_funcs_get_parent (ufuncs) != NULL);
   g_assert_cmphex (data->value, ==, MAGIC0);
-  g_assert (!data->freed);
+  g_assert_true (!data->freed);
 
   if ('a' <= codepoint && codepoint <= 'z')
     return HB_SCRIPT_LATIN;
@@ -84,9 +84,9 @@ a_is_for_arabic_get_script (hb_unicode_funcs_t *ufuncs,
 {
   data_t *data = (data_t *) user_data;
 
-  g_assert (hb_unicode_funcs_get_parent (ufuncs) != NULL);
+  g_assert_true (hb_unicode_funcs_get_parent (ufuncs) != NULL);
   g_assert_cmphex (data->value, ==, MAGIC1);
-  g_assert (!data->freed);
+  g_assert_true (!data->freed);
 
   if (codepoint == 'a') {
     return HB_SCRIPT_ARABIC;
@@ -187,6 +187,12 @@ static const test_pair_t combining_class_tests_more[] =
   /* Unicode-15.0 character additions */
   {  0x10EFD, 220 },
 
+  /* Unicode-16.0 character additions */
+  {   0x0897, 230 },
+
+  /* Unicode-17.0 character additions */
+  {   0x1ACF, 230 },
+
   { 0x111111, 0 }
 };
 
@@ -272,6 +278,15 @@ static const test_pair_t general_category_tests_more[] =
 
   /* Unicode-15.0 character additions */
   {   0x0CF3, HB_UNICODE_GENERAL_CATEGORY_SPACING_MARK },
+
+  /* Unicode-15.1 character additions */
+  {   0x31EF, HB_UNICODE_GENERAL_CATEGORY_OTHER_SYMBOL },
+
+  /* Unicode-16.0 character additions */
+  {  0x10D6E, HB_UNICODE_GENERAL_CATEGORY_DASH_PUNCTUATION },
+
+  /* Unicode-17.0 character additions */
+  {  0x11DE0, HB_UNICODE_GENERAL_CATEGORY_DECIMAL_NUMBER },
 
   { 0x111111, HB_UNICODE_GENERAL_CATEGORY_UNASSIGNED }
 };
@@ -416,7 +431,7 @@ static const test_pair_t script_tests_more[] =
   /* Unicode-5.2 additions */
   {  0x10B00, HB_SCRIPT_AVESTAN },
   {   0xA6A0, HB_SCRIPT_BAMUM },
-  {   0x1400, HB_SCRIPT_CANADIAN_ABORIGINAL },
+  {   0x1400, HB_SCRIPT_CANADIAN_SYLLABICS },
   {  0x13000, HB_SCRIPT_EGYPTIAN_HIEROGLYPHS },
   {  0x10840, HB_SCRIPT_IMPERIAL_ARAMAIC },
   {   0x1CED, HB_SCRIPT_INHERITED },
@@ -534,6 +549,21 @@ static const test_pair_t script_tests_more[] =
   {  0x11F00, HB_SCRIPT_KAWI },
   {  0x1E4D0, HB_SCRIPT_NAG_MUNDARI },
 
+  /* Unicode-16.0 additions */
+  {  0x105C0, HB_SCRIPT_TODHRI },
+  {  0x10D40, HB_SCRIPT_GARAY },
+  {  0x11380, HB_SCRIPT_TULU_TIGALARI },
+  {  0x11BC0, HB_SCRIPT_SUNUWAR },
+  {  0x16100, HB_SCRIPT_GURUNG_KHEMA },
+  {  0x16D40, HB_SCRIPT_KIRAT_RAI },
+  {  0x1E5D0, HB_SCRIPT_OL_ONAL },
+
+  /* Unicode-16.0 additions */
+  {  0x10940, HB_SCRIPT_SIDETIC },
+  {  0x11DB0, HB_SCRIPT_TOLONG_SIKI },
+  {  0x16EA0, HB_SCRIPT_BERIA_ERFE },
+  {  0x1E6C0, HB_SCRIPT_TAI_YO },
+
   { 0x111111, HB_SCRIPT_UNKNOWN }
 };
 
@@ -559,13 +589,22 @@ typedef struct {
   unsigned int        default_value;
 } property_t;
 
+static unsigned _hb_unicode_combining_class (hb_unicode_funcs_t *ufuncs, hb_codepoint_t unicode)
+{ return (unsigned) hb_unicode_combining_class (ufuncs, unicode); }
+static unsigned _hb_unicode_general_category (hb_unicode_funcs_t *ufuncs, hb_codepoint_t unicode)
+{ return (unsigned) hb_unicode_general_category (ufuncs, unicode); }
+static unsigned _hb_unicode_mirroring (hb_unicode_funcs_t *ufuncs, hb_codepoint_t unicode)
+{ return (unsigned) hb_unicode_mirroring (ufuncs, unicode); }
+static unsigned _hb_unicode_script (hb_unicode_funcs_t *ufuncs, hb_codepoint_t unicode)
+{ return (unsigned) hb_unicode_script (ufuncs, unicode); }
+
 #define RETURNS_UNICODE_ITSELF ((unsigned int) -1)
 
 #define PROPERTY(name, DEFAULT) \
   { \
     #name, \
     (func_setter_func_t) hb_unicode_funcs_set_##name##_func, \
-    (getter_func_t) hb_unicode_##name, \
+    _hb_unicode_##name, \
     name##_tests, \
     G_N_ELEMENTS (name##_tests), \
     name##_tests_more, \
@@ -591,8 +630,8 @@ test_unicode_properties (gconstpointer user_data, hb_bool_t lenient)
   unsigned int i, j;
   gboolean failed = TRUE;
 
-  g_assert (hb_unicode_funcs_is_immutable (uf));
-  g_assert (hb_unicode_funcs_get_parent (uf));
+  g_assert_true (hb_unicode_funcs_is_immutable (uf));
+  g_assert_true (hb_unicode_funcs_get_parent (uf));
 
   for (i = 0; i < G_N_ELEMENTS (properties); i++) {
     const property_t *p = &properties[i];
@@ -668,7 +707,7 @@ test_unicode_properties_nil (void)
 {
   hb_unicode_funcs_t *uf = hb_unicode_funcs_create (NULL);
 
-  g_assert (!hb_unicode_funcs_is_immutable (uf));
+  g_assert_true (!hb_unicode_funcs_is_immutable (uf));
   _test_unicode_properties_nil (uf);
 
   hb_unicode_funcs_destroy (uf);
@@ -679,8 +718,8 @@ test_unicode_properties_empty (void)
 {
   hb_unicode_funcs_t *uf = hb_unicode_funcs_get_empty ();
 
-  g_assert (uf);
-  g_assert (hb_unicode_funcs_is_immutable (uf));
+  g_assert_true (uf);
+  g_assert_true (hb_unicode_funcs_is_immutable (uf));
   _test_unicode_properties_nil (uf);
 }
 
@@ -693,13 +732,13 @@ test_unicode_chainup (void)
   /* Chain-up to nil */
 
   uf = hb_unicode_funcs_create (NULL);
-  g_assert (!hb_unicode_funcs_is_immutable (uf));
+  g_assert_true (!hb_unicode_funcs_is_immutable (uf));
 
   uf2 = hb_unicode_funcs_create (uf);
-  g_assert (hb_unicode_funcs_is_immutable (uf));
+  g_assert_true (hb_unicode_funcs_is_immutable (uf));
   hb_unicode_funcs_destroy (uf);
 
-  g_assert (!hb_unicode_funcs_is_immutable (uf2));
+  g_assert_true (!hb_unicode_funcs_is_immutable (uf2));
   _test_unicode_properties_nil (uf2);
 
   hb_unicode_funcs_destroy (uf2);
@@ -707,13 +746,13 @@ test_unicode_chainup (void)
   /* Chain-up to default */
 
   uf = hb_unicode_funcs_create (hb_unicode_funcs_get_default ());
-  g_assert (!hb_unicode_funcs_is_immutable (uf));
+  g_assert_true (!hb_unicode_funcs_is_immutable (uf));
 
   uf2 = hb_unicode_funcs_create (uf);
-  g_assert (hb_unicode_funcs_is_immutable (uf));
+  g_assert_true (hb_unicode_funcs_is_immutable (uf));
   hb_unicode_funcs_destroy (uf);
 
-  g_assert (!hb_unicode_funcs_is_immutable (uf2));
+  g_assert_true (!hb_unicode_funcs_is_immutable (uf2));
   hb_unicode_funcs_make_immutable (uf2);
   test_unicode_properties_strict (uf2);
 
@@ -737,7 +776,7 @@ test_unicode_setters (void)
     g_test_message ("Testing property %s", p->name);
 
     uf = hb_unicode_funcs_create (NULL);
-    g_assert (!hb_unicode_funcs_is_immutable (uf));
+    g_assert_true (!hb_unicode_funcs_is_immutable (uf));
 
     p->func_setter (uf, (get_func_t) simple_get_script, &data[0], free_up);
 
@@ -745,18 +784,18 @@ test_unicode_setters (void)
     g_assert_cmphex (p->getter (uf, '0'), ==, HB_SCRIPT_UNKNOWN);
 
     p->func_setter (uf, (get_func_t) NULL, NULL, NULL);
-    g_assert (data[0].freed && !data[1].freed);
+    g_assert_true (data[0].freed && !data[1].freed);
 
-    g_assert (!hb_unicode_funcs_is_immutable (uf));
+    g_assert_true (!hb_unicode_funcs_is_immutable (uf));
     hb_unicode_funcs_make_immutable (uf);
-    g_assert (hb_unicode_funcs_is_immutable (uf));
+    g_assert_true (hb_unicode_funcs_is_immutable (uf));
 
     /* Since uf is immutable now, the following setter should do nothing. */
     p->func_setter (uf, (get_func_t) a_is_for_arabic_get_script, &data[1], free_up);
 
-    g_assert (data[0].freed && data[1].freed);
+    g_assert_true (data[0].freed && data[1].freed);
     hb_unicode_funcs_destroy (uf);
-    g_assert (data[0].freed && data[1].freed);
+    g_assert_true (data[0].freed && data[1].freed);
   }
 }
 
@@ -767,19 +806,21 @@ typedef struct {
 } data_fixture_t;
 
 static void
-data_fixture_init (data_fixture_t *f, gconstpointer user_data HB_UNUSED)
+data_fixture_init (gpointer fixture, gconstpointer user_data HB_UNUSED)
 {
+  data_fixture_t *f = (data_fixture_t *) fixture;
   f->data[0].value = MAGIC0;
   f->data[1].value = MAGIC1;
 }
 static void
-data_fixture_finish (data_fixture_t *f HB_UNUSED, gconstpointer user_data HB_UNUSED)
+data_fixture_finish (gpointer fixture HB_UNUSED, gconstpointer user_data HB_UNUSED)
 {
 }
 
 static void
-test_unicode_subclassing_nil (data_fixture_t *f, gconstpointer user_data HB_UNUSED)
+test_unicode_subclassing_nil (gpointer fixture, gconstpointer user_data HB_UNUSED)
 {
+  data_fixture_t *f = (data_fixture_t *) fixture;
   hb_unicode_funcs_t *uf, *aa;
 
   uf = hb_unicode_funcs_create (NULL);
@@ -794,14 +835,15 @@ test_unicode_subclassing_nil (data_fixture_t *f, gconstpointer user_data HB_UNUS
   g_assert_cmphex (hb_unicode_script (aa, 'a'), ==, HB_SCRIPT_ARABIC);
   g_assert_cmphex (hb_unicode_script (aa, 'b'), ==, HB_SCRIPT_UNKNOWN);
 
-  g_assert (!f->data[0].freed && !f->data[1].freed);
+  g_assert_true (!f->data[0].freed && !f->data[1].freed);
   hb_unicode_funcs_destroy (aa);
-  g_assert (!f->data[0].freed && f->data[1].freed);
+  g_assert_true (!f->data[0].freed && f->data[1].freed);
 }
 
 static void
-test_unicode_subclassing_default (data_fixture_t *f, gconstpointer user_data HB_UNUSED)
+test_unicode_subclassing_default (gpointer fixture, gconstpointer user_data HB_UNUSED)
 {
+  data_fixture_t *f = (data_fixture_t *) fixture;
   hb_unicode_funcs_t *uf, *aa;
 
   uf = hb_unicode_funcs_get_default ();
@@ -813,14 +855,15 @@ test_unicode_subclassing_default (data_fixture_t *f, gconstpointer user_data HB_
   g_assert_cmphex (hb_unicode_script (aa, 'a'), ==, HB_SCRIPT_ARABIC);
   g_assert_cmphex (hb_unicode_script (aa, 'b'), ==, HB_SCRIPT_LATIN);
 
-  g_assert (!f->data[0].freed && !f->data[1].freed);
+  g_assert_true (!f->data[0].freed && !f->data[1].freed);
   hb_unicode_funcs_destroy (aa);
-  g_assert (!f->data[0].freed && f->data[1].freed);
+  g_assert_true (!f->data[0].freed && f->data[1].freed);
 }
 
 static void
-test_unicode_subclassing_deep (data_fixture_t *f, gconstpointer user_data HB_UNUSED)
+test_unicode_subclassing_deep (gpointer fixture, gconstpointer user_data HB_UNUSED)
 {
+  data_fixture_t *f = (data_fixture_t *) fixture;
   hb_unicode_funcs_t *uf, *aa;
 
   uf = hb_unicode_funcs_create (NULL);
@@ -833,7 +876,7 @@ test_unicode_subclassing_deep (data_fixture_t *f, gconstpointer user_data HB_UNU
   hb_unicode_funcs_destroy (uf);
 
   /* make sure the 'uf' didn't get freed, since 'aa' holds a ref */
-  g_assert (!f->data[0].freed);
+  g_assert_true (!f->data[0].freed);
 
   hb_unicode_funcs_set_script_func (aa, a_is_for_arabic_get_script,
 				    &f->data[1], free_up);
@@ -842,9 +885,9 @@ test_unicode_subclassing_deep (data_fixture_t *f, gconstpointer user_data HB_UNU
   g_assert_cmphex (hb_unicode_script (aa, 'b'), ==, HB_SCRIPT_LATIN);
   g_assert_cmphex (hb_unicode_script (aa, '0'), ==, HB_SCRIPT_UNKNOWN);
 
-  g_assert (!f->data[0].freed && !f->data[1].freed);
+  g_assert_true (!f->data[0].freed && !f->data[1].freed);
   hb_unicode_funcs_destroy (aa);
-  g_assert (f->data[0].freed && f->data[1].freed);
+  g_assert_true (f->data[0].freed && f->data[1].freed);
 }
 
 
@@ -913,67 +956,67 @@ test_unicode_normalization (gconstpointer user_data)
   /* Test compose() */
 
   /* Not composable */
-  g_assert (!hb_unicode_compose (uf, 0x0041, 0x0042, &ab) && ab == 0);
-  g_assert (!hb_unicode_compose (uf, 0x0041, 0, &ab) && ab == 0);
-  g_assert (!hb_unicode_compose (uf, 0x0066, 0x0069, &ab) && ab == 0);
+  g_assert_true (!hb_unicode_compose (uf, 0x0041, 0x0042, &ab) && ab == 0);
+  g_assert_true (!hb_unicode_compose (uf, 0x0041, 0, &ab) && ab == 0);
+  g_assert_true (!hb_unicode_compose (uf, 0x0066, 0x0069, &ab) && ab == 0);
 
   /* Singletons should not compose */
-  g_assert (!hb_unicode_compose (uf, 0x212B, 0, &ab) && ab == 0);
-  g_assert (!hb_unicode_compose (uf, 0x00C5, 0, &ab) && ab == 0);
-  g_assert (!hb_unicode_compose (uf, 0x2126, 0, &ab) && ab == 0);
-  g_assert (!hb_unicode_compose (uf, 0x03A9, 0, &ab) && ab == 0);
+  g_assert_true (!hb_unicode_compose (uf, 0x212B, 0, &ab) && ab == 0);
+  g_assert_true (!hb_unicode_compose (uf, 0x00C5, 0, &ab) && ab == 0);
+  g_assert_true (!hb_unicode_compose (uf, 0x2126, 0, &ab) && ab == 0);
+  g_assert_true (!hb_unicode_compose (uf, 0x03A9, 0, &ab) && ab == 0);
 
   /* Non-starter pairs should not compose */
-  g_assert (!hb_unicode_compose (uf, 0x0308, 0x0301, &ab) && ab == 0); /* !0x0344 */
-  g_assert (!hb_unicode_compose (uf, 0x0F71, 0x0F72, &ab) && ab == 0); /* !0x0F73 */
+  g_assert_true (!hb_unicode_compose (uf, 0x0308, 0x0301, &ab) && ab == 0); /* !0x0344 */
+  g_assert_true (!hb_unicode_compose (uf, 0x0F71, 0x0F72, &ab) && ab == 0); /* !0x0F73 */
 
   /* Pairs */
-  g_assert (hb_unicode_compose (uf, 0x0041, 0x030A, &ab) && ab == 0x00C5);
-  g_assert (hb_unicode_compose (uf, 0x006F, 0x0302, &ab) && ab == 0x00F4);
-  g_assert (hb_unicode_compose (uf, 0x1E63, 0x0307, &ab) && ab == 0x1E69);
-  g_assert (hb_unicode_compose (uf, 0x0073, 0x0323, &ab) && ab == 0x1E63);
-  g_assert (hb_unicode_compose (uf, 0x0064, 0x0307, &ab) && ab == 0x1E0B);
-  g_assert (hb_unicode_compose (uf, 0x0064, 0x0323, &ab) && ab == 0x1E0D);
+  g_assert_true (hb_unicode_compose (uf, 0x0041, 0x030A, &ab) && ab == 0x00C5);
+  g_assert_true (hb_unicode_compose (uf, 0x006F, 0x0302, &ab) && ab == 0x00F4);
+  g_assert_true (hb_unicode_compose (uf, 0x1E63, 0x0307, &ab) && ab == 0x1E69);
+  g_assert_true (hb_unicode_compose (uf, 0x0073, 0x0323, &ab) && ab == 0x1E63);
+  g_assert_true (hb_unicode_compose (uf, 0x0064, 0x0307, &ab) && ab == 0x1E0B);
+  g_assert_true (hb_unicode_compose (uf, 0x0064, 0x0323, &ab) && ab == 0x1E0D);
 
   /* Hangul */
-  g_assert (hb_unicode_compose (uf, 0xD4CC, 0x11B6, &ab) && ab == 0xD4DB);
-  g_assert (hb_unicode_compose (uf, 0x1111, 0x1171, &ab) && ab == 0xD4CC);
-  g_assert (hb_unicode_compose (uf, 0xCE20, 0x11B8, &ab) && ab == 0xCE31);
-  g_assert (hb_unicode_compose (uf, 0x110E, 0x1173, &ab) && ab == 0xCE20);
+  g_assert_true (hb_unicode_compose (uf, 0xD4CC, 0x11B6, &ab) && ab == 0xD4DB);
+  g_assert_true (hb_unicode_compose (uf, 0x1111, 0x1171, &ab) && ab == 0xD4CC);
+  g_assert_true (hb_unicode_compose (uf, 0xCE20, 0x11B8, &ab) && ab == 0xCE31);
+  g_assert_true (hb_unicode_compose (uf, 0x110E, 0x1173, &ab) && ab == 0xCE20);
 
-  g_assert (!hb_unicode_compose (uf, 0xAC00, 0x11A7, &ab));
-  g_assert (hb_unicode_compose (uf, 0xAC00, 0x11A8, &ab) && ab == 0xAC01);
-  g_assert (!hb_unicode_compose (uf, 0xAC01, 0x11A8, &ab));
+  g_assert_true (!hb_unicode_compose (uf, 0xAC00, 0x11A7, &ab));
+  g_assert_true (hb_unicode_compose (uf, 0xAC00, 0x11A8, &ab) && ab == 0xAC01);
+  g_assert_true (!hb_unicode_compose (uf, 0xAC01, 0x11A8, &ab));
 
 
   /* Test decompose() */
 
   /* Not decomposable */
-  g_assert (!hb_unicode_decompose (uf, 0x0041, &a, &b) && a == 0x0041 && b == 0);
-  g_assert (!hb_unicode_decompose (uf, 0xFB01, &a, &b) && a == 0xFB01 && b == 0);
-  g_assert (!hb_unicode_decompose (uf, 0x1F1EF, &a, &b) && a == 0x1F1EF && b == 0);
+  g_assert_true (!hb_unicode_decompose (uf, 0x0041, &a, &b) && a == 0x0041 && b == 0);
+  g_assert_true (!hb_unicode_decompose (uf, 0xFB01, &a, &b) && a == 0xFB01 && b == 0);
+  g_assert_true (!hb_unicode_decompose (uf, 0x1F1EF, &a, &b) && a == 0x1F1EF && b == 0);
 
   /* Singletons */
-  g_assert (hb_unicode_decompose (uf, 0x212B, &a, &b) && a == 0x00C5 && b == 0);
-  g_assert (hb_unicode_decompose (uf, 0x2126, &a, &b) && a == 0x03A9 && b == 0);
+  g_assert_true (hb_unicode_decompose (uf, 0x212B, &a, &b) && a == 0x00C5 && b == 0);
+  g_assert_true (hb_unicode_decompose (uf, 0x2126, &a, &b) && a == 0x03A9 && b == 0);
 
   /* Non-starter pairs decompose, but not compose */
-  g_assert (hb_unicode_decompose (uf, 0x0344, &a, &b) && a == 0x0308 && b == 0x0301);
-  g_assert (hb_unicode_decompose (uf, 0x0F73, &a, &b) && a == 0x0F71 && b == 0x0F72);
+  g_assert_true (hb_unicode_decompose (uf, 0x0344, &a, &b) && a == 0x0308 && b == 0x0301);
+  g_assert_true (hb_unicode_decompose (uf, 0x0F73, &a, &b) && a == 0x0F71 && b == 0x0F72);
 
   /* Pairs */
-  g_assert (hb_unicode_decompose (uf, 0x00C5, &a, &b) && a == 0x0041 && b == 0x030A);
-  g_assert (hb_unicode_decompose (uf, 0x00F4, &a, &b) && a == 0x006F && b == 0x0302);
-  g_assert (hb_unicode_decompose (uf, 0x1E69, &a, &b) && a == 0x1E63 && b == 0x0307);
-  g_assert (hb_unicode_decompose (uf, 0x1E63, &a, &b) && a == 0x0073 && b == 0x0323);
-  g_assert (hb_unicode_decompose (uf, 0x1E0B, &a, &b) && a == 0x0064 && b == 0x0307);
-  g_assert (hb_unicode_decompose (uf, 0x1E0D, &a, &b) && a == 0x0064 && b == 0x0323);
+  g_assert_true (hb_unicode_decompose (uf, 0x00C5, &a, &b) && a == 0x0041 && b == 0x030A);
+  g_assert_true (hb_unicode_decompose (uf, 0x00F4, &a, &b) && a == 0x006F && b == 0x0302);
+  g_assert_true (hb_unicode_decompose (uf, 0x1E69, &a, &b) && a == 0x1E63 && b == 0x0307);
+  g_assert_true (hb_unicode_decompose (uf, 0x1E63, &a, &b) && a == 0x0073 && b == 0x0323);
+  g_assert_true (hb_unicode_decompose (uf, 0x1E0B, &a, &b) && a == 0x0064 && b == 0x0307);
+  g_assert_true (hb_unicode_decompose (uf, 0x1E0D, &a, &b) && a == 0x0064 && b == 0x0323);
 
   /* Hangul */
-  g_assert (hb_unicode_decompose (uf, 0xD4DB, &a, &b) && a == 0xD4CC && b == 0x11B6);
-  g_assert (hb_unicode_decompose (uf, 0xD4CC, &a, &b) && a == 0x1111 && b == 0x1171);
-  g_assert (hb_unicode_decompose (uf, 0xCE31, &a, &b) && a == 0xCE20 && b == 0x11B8);
-  g_assert (hb_unicode_decompose (uf, 0xCE20, &a, &b) && a == 0x110E && b == 0x1173);
+  g_assert_true (hb_unicode_decompose (uf, 0xD4DB, &a, &b) && a == 0xD4CC && b == 0x11B6);
+  g_assert_true (hb_unicode_decompose (uf, 0xD4CC, &a, &b) && a == 0x1111 && b == 0x1171);
+  g_assert_true (hb_unicode_decompose (uf, 0xCE31, &a, &b) && a == 0xCE20 && b == 0x11B8);
+  g_assert_true (hb_unicode_decompose (uf, 0xCE20, &a, &b) && a == 0x110E && b == 0x1173);
 }
 
 
@@ -981,6 +1024,9 @@ test_unicode_normalization (gconstpointer user_data)
 int
 main (int argc, char **argv)
 {
+  char *ubsan_obtions = getenv ("UBSAN_OPTIONS");
+  int ubsan = ubsan_obtions && strstr (ubsan_obtions, "halt_on_error=1");
+
   hb_test_init (&argc, &argv);
 
   hb_test_add (test_unicode_properties_nil);
@@ -1002,7 +1048,8 @@ main (int argc, char **argv)
 
   hb_test_add (test_unicode_chainup);
 
-  hb_test_add (test_unicode_setters);
+  if (!ubsan)
+    hb_test_add (test_unicode_setters);
 
   hb_test_add_fixture (data_fixture, NULL, test_unicode_subclassing_nil);
   hb_test_add_fixture (data_fixture, NULL, test_unicode_subclassing_default);

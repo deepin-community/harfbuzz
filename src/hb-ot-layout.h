@@ -325,6 +325,13 @@ hb_ot_layout_collect_features (hb_face_t      *face,
 			       hb_set_t       *feature_indexes /* OUT */);
 
 HB_EXTERN void
+hb_ot_layout_collect_features_map (hb_face_t      *face,
+				   hb_tag_t        table_tag,
+				   unsigned        script_index,
+				   unsigned        language_index,
+				   hb_map_t       *feature_map /* OUT */);
+
+HB_EXTERN void
 hb_ot_layout_collect_lookups (hb_face_t      *face,
 			      hb_tag_t        table_tag,
 			      const hb_tag_t *scripts,
@@ -375,6 +382,12 @@ hb_ot_layout_lookup_get_glyph_alternates (hb_face_t      *face,
 					  unsigned        start_offset,
 					  unsigned       *alternate_count /* IN/OUT */,
 					  hb_codepoint_t *alternate_glyphs /* OUT */);
+
+HB_EXTERN hb_bool_t
+hb_ot_layout_lookup_collect_glyph_alternates (hb_face_t *face,
+					      unsigned   lookup_index,
+					      hb_map_t  *alternate_count /* IN/OUT */,
+					      hb_map_t  *alternate_glyphs /* IN/OUT */);
 
 HB_EXTERN hb_bool_t
 hb_ot_layout_lookup_would_substitute (hb_face_t            *face,

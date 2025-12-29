@@ -32,18 +32,6 @@
 #include "hb-test.h"
 #include "hb-subset.h"
 
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-typedef short bool;
-# ifndef true
-#  define true 1
-# endif
-# ifndef false
-#  define false 0
-# endif
-#endif
-
 
 HB_BEGIN_DECLS
 
@@ -85,7 +73,7 @@ hb_subset_test_create_subset (hb_face_t *source,
 			      hb_subset_input_t *input)
 {
   hb_face_t *subset = hb_subset_or_fail (source, input);
-  g_assert (subset);
+  g_assert_true (subset);
 
   hb_subset_input_destroy (input);
   return subset;
@@ -99,7 +87,6 @@ hb_subset_test_check (hb_face_t *expected,
   hb_blob_t *expected_blob, *actual_blob;
   expected_blob = hb_face_reference_table (expected, table);
   actual_blob = hb_face_reference_table (actual, table);
-  fprintf(stderr, "comparing %c%c%c%c, expected %d bytes, actual %d bytes\n", HB_UNTAG(table), hb_blob_get_length(expected_blob), hb_blob_get_length (actual_blob));
 
   if (hb_blob_get_length (expected_blob) != 0 ||
       hb_blob_get_length (actual_blob) != 0)

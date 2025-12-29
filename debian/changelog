@@ -1,3 +1,107 @@
+harfbuzz (12.2.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * d/control: drop dh-sequence-movetousr from build-deps (Closes: #1122764)
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Fri, 12 Dec 2025 17:49:44 +0100
+
+harfbuzz (12.1.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Drop redundant Rules-Requires-Root field
+  * d/libharfbuzz0b.symbols: update symbols
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Wed, 01 Oct 2025 16:54:22 +0200
+
+harfbuzz (11.5.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * d/libharfbuzz-gobject0.lintian-overrides: add wildcards for arch & lib
+    version
+  * d/control: update build-dep: libgirepository1.0-dev =>
+    gobject-introspection (>= 1.80)
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Wed, 17 Sep 2025 16:13:26 +0200
+
+harfbuzz (11.4.5-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #1112316)
+  * d/control:
+    + add dh-sequence-movetousr to build-deps
+    + add help2man to build deps
+    + update standards version to 4.7.2
+  * d/libharfbuzz-bin.install: install utilties' man pages
+  * d/libharfbuzz0b.symbols: update symbols
+  * d/copyright: remove obsolete files
+  * Add d/libharfbuzz-bin.lintian-overrides
+  * Add d/libharfbuzz-gobject0.lintian-overrides
+  * Add fix-man-whatis.patch to create man pages with useful whatis entry
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Tue, 02 Sep 2025 16:48:20 +0200
+
+harfbuzz (10.2.0-1) unstable; urgency=medium
+
+  * New upstream version 10.2.0
+  * d/libharfbuzz-subset0.symbols: Update symbols
+  * Dropped cairo-Guard-hb_cairo_glyphs_from_buffer-against-bad-UTF-8.patch,
+    applied upstream
+  * Update copyright years
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Tue, 14 Jan 2025 22:20:38 +0100
+
+harfbuzz (10.1.0-2) unstable; urgency=high
+
+  * Team upload
+  * SECURITY UPDATE: Heap-based buffer overflow (Closes: #1091529)
+    - Cherry-pick upstream fix for the hb_cairo_glyphs_from_buffer function
+    - CVE-2024-56732
+  * debian/upstream/metadata: Add security contact
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 28 Dec 2024 12:53:25 -0500
+
+harfbuzz (10.1.0-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream version 10.1.0
+  * debian/libharfbuzz0b.symbols: Add new symbols
+  * Update Homepage
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 06 Dec 2024 23:20:19 -0500
+
+harfbuzz (10.0.1-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream version 10.0.1
+  * debian/libharfbuzz0b.symbols: Add new symbols
+  * Bump Standards Version to 4.7.0
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 17 Oct 2024 14:26:03 -0400
+
+harfbuzz (9.0.0-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream version 9.0.0
+  * debian/*.symbols: Add new symbols
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 14 Aug 2024 11:51:31 -0400
+
+harfbuzz (8.3.0-2) unstable; urgency=medium
+
+  * Team upload
+  * Release to unstable
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 20 Jan 2024 10:33:21 -0500
+
+harfbuzz (8.3.0-1) experimental; urgency=medium
+
+  * Team upload
+  * New upstream version 8.3.0 (Closes: #1057964)
+  * debian/libharfbuzz0b.symbols: Add new symbols
+  * Add ${gir:Depends}, ${gir:Provides} to -dev package (Closes: #1061082)
+  * d/control: Build-depend on GIR XML that is explicitly included
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 19 Jan 2024 21:14:42 -0500
+
 harfbuzz (8.0.1-1) unstable; urgency=medium
 
   * New upstream version 8.0.1

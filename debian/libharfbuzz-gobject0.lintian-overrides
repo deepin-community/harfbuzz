@@ -1,0 +1,2 @@
+# False positive, see: https://bugs.debian.org/909267
+libharfbuzz-gobject0: library-not-linked-against-libc [usr/lib/*/libharfbuzz-gobject.so.0.*]

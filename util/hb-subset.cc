@@ -27,8 +27,10 @@
 
 #include "batch.hh"
 #include "face-options.hh"
+#include "glib.h"
 #include "main-font-text.hh"
 #include "output-options.hh"
+#include "helper-subset.hh"
 
 #include <hb-subset.h>
 
@@ -53,22 +55,11 @@ struct subset_main_t : option_parser_t, face_options_t, output_options_t<false>
 
   void parse_face (int argc, const char * const *argv)
   {
-    option_parser_t parser;
-    face_options_t face_opts;
+    subset_main_t main2;
+    main2.add_options ();
 
-    face_opts.add_options (&parser);
-
-    GOptionEntry entries[] =
-    {
-      {G_OPTION_REMAINING,	0, G_OPTION_FLAG_IN_MAIN,
-				G_OPTION_ARG_CALLBACK,	(gpointer) &collect_face,	nullptr,	"[FONT-FILE] [TEXT]"},
-      {nullptr}
-    };
-    parser.add_main_group (entries, &face_opts);
-    parser.add_options ();
-
-    g_option_context_set_ignore_unknown_options (parser.context, true);
-    g_option_context_set_help_enabled (parser.context, false);
+    g_option_context_set_ignore_unknown_options (main2.context, true);
+    g_option_context_set_help_enabled (main2.context, false);
 
     char **args = (char **)
 #if GLIB_CHECK_VERSION (2, 68, 0)
@@ -77,10 +68,10 @@ struct subset_main_t : option_parser_t, face_options_t, output_options_t<false>
       g_memdup
 #endif
       (argv, argc * sizeof (*argv));
-    parser.parse (&argc, &args);
+    main2.option_parser_t::parse (&argc, &args);
     g_free (args);
 
-    set_face (face_opts.face);
+    set_face (main2.face);
   }
 
   void parse (int argc, char **argv)
@@ -109,8 +100,23 @@ struct subset_main_t : option_parser_t, face_options_t, output_options_t<false>
     parse (argc, argv);
 
     hb_face_t* orig_face = face;
+    if (orig_face != cache.face)
+    {
+      hb_face_destroy (cache.face);
+      cache.face = hb_face_reference (orig_face);
+      if (cache.face_preprocessed)
+      {
+        hb_face_destroy (cache.face_preprocessed);
+	cache.face_preprocessed = nullptr;
+      }
+    }
+
     if (preprocess)
-      orig_face = preprocess_face (face);
+    {
+      if (!cache.face_preprocessed)
+        cache.face_preprocessed = preprocess_face (cache.face);
+      orig_face = cache.face_preprocessed;
+    }
 
     hb_face_t *new_face = nullptr;
     for (unsigned i = 0; i < num_iterations; i++)
@@ -126,10 +132,10 @@ struct subset_main_t : option_parser_t, face_options_t, output_options_t<false>
       write_file (output_file, result);
       hb_blob_destroy (result);
     }
+    else if (hb_face_get_glyph_count (orig_face) == 0)
+      fail (false, "Invalid font file.");
 
     hb_face_destroy (new_face);
-    if (preprocess)
-      hb_face_destroy (orig_face);
 
     return success ? 0 : 1;
   }
@@ -173,7 +179,23 @@ struct subset_main_t : option_parser_t, face_options_t, output_options_t<false>
   unsigned num_iterations = 1;
   gboolean preprocess = false;
   hb_subset_input_t *input = nullptr;
+
+  static struct cache_t
+  {
+    ~cache_t ()
+    {
+      hb_face_destroy (face);
+      hb_face_destroy (face_preprocessed);
+      hb_font_destroy (font);
+    }
+
+    hb_face_t *face = nullptr;
+    hb_face_t *face_preprocessed = nullptr;
+    hb_font_t *font = nullptr;
+  } cache;
 };
+
+subset_main_t::cache_t subset_main_t::cache {};
 
 static gboolean
 parse_gids (const char *name G_GNUC_UNUSED,
@@ -252,12 +274,18 @@ parse_gids (const char *name G_GNUC_UNUSED,
 }
 
 static gboolean
-parse_glyphs (const char *name G_GNUC_UNUSED,
+parse_glyphs (const char *name,
 	      const char *arg,
 	      gpointer    data,
 	      GError    **error G_GNUC_UNUSED)
 {
   subset_main_t *subset_main = (subset_main_t *) data;
+  if (!subset_main->face)
+  {
+    // We are in pre-parsing.
+    return true;
+  }
+
   hb_bool_t is_remove = (name[strlen (name) - 1] == '-');
   hb_bool_t is_add = (name[strlen (name) - 1] == '+');
   hb_set_t *gids = hb_subset_input_glyph_set (subset_main->input);
@@ -275,7 +303,10 @@ parse_glyphs (const char *name G_GNUC_UNUSED,
   const char *p = arg;
   const char *p_end = arg + strlen (arg);
 
-  hb_font_t *font = hb_font_create (subset_main->face);
+  if (!subset_main->cache.font)
+    subset_main->cache.font = hb_font_create (subset_main->face);
+  hb_font_t *font = subset_main->cache.font;
+
   while (p < p_end)
   {
     while (p < p_end && (*p == ' ' || *p == ','))
@@ -288,7 +319,7 @@ parse_glyphs (const char *name G_GNUC_UNUSED,
     if (p < end)
     {
       hb_codepoint_t gid;
-      if (!hb_font_get_glyph_from_name (font, p, end - p, &gid))
+      if (!hb_font_glyph_from_string (font, p, end - p, &gid))
       {
 	g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
 		     "Failed parsing glyph name: '%s'", p);
@@ -303,13 +334,12 @@ parse_glyphs (const char *name G_GNUC_UNUSED,
 
     p = end + 1;
   }
-  hb_font_destroy (font);
 
   return true;
 }
 
 static gboolean
-parse_text (const char *name G_GNUC_UNUSED,
+parse_text (const char *name,
 	    const char *arg,
 	    gpointer    data,
 	    GError    **error G_GNUC_UNUSED)
@@ -343,7 +373,7 @@ parse_text (const char *name G_GNUC_UNUSED,
 }
 
 static gboolean
-parse_unicodes (const char *name G_GNUC_UNUSED,
+parse_unicodes (const char *name,
 		const char *arg,
 		gpointer    data,
 		GError    **error)
@@ -674,6 +704,7 @@ parse_drop_tables (const char *name,
 }
 
 #ifndef HB_NO_VAR
+
 static gboolean
 parse_instance (const char *name,
 		const char *arg,
@@ -681,64 +712,13 @@ parse_instance (const char *name,
 		GError    **error)
 {
   subset_main_t *subset_main = (subset_main_t *) data;
-  if (!subset_main->face) {
-    // There is no face, which is needed to set up instancing. Skip parsing these options.
+  if (!subset_main->face)
+  {
+    // We are in pre-parsing.
     return true;
   }
 
-  char *s = strtok((char *) arg, "=");
-  while (s)
-  {
-    unsigned len = strlen (s);
-    if (len > 4)  //Axis tags are 4 bytes.
-    {
-      g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
-		   "Failed parsing axis tag at: '%s'", s);
-      return false;
-    }
-
-    hb_tag_t axis_tag = hb_tag_from_string (s, len);
-
-    s = strtok(nullptr, ", ");
-    if (!s)
-    {
-      g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
-		   "Value not specified for axis: %c%c%c%c", HB_UNTAG (axis_tag));
-      return false;
-    }
-
-    if (strcmp (s, "drop") == 0)
-    {
-      if (!hb_subset_input_pin_axis_to_default (subset_main->input, subset_main->face, axis_tag))
-      {
-        g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
-                     "Cannot pin axis: '%c%c%c%c', not present in fvar", HB_UNTAG (axis_tag));
-        return false;
-      }
-    }
-    else
-    {
-      errno = 0;
-      char *p;
-      float axis_value = strtof (s, &p);
-      if (errno || s == p)
-      {
-        g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
-                     "Failed parsing axis value at: '%s'", s);
-        return false;
-      }
-
-      if (!hb_subset_input_pin_axis_location (subset_main->input, subset_main->face, axis_tag, axis_value))
-      {
-        g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
-                     "Cannot pin axis: '%c%c%c%c', not present in fvar", HB_UNTAG (axis_tag));
-        return false;
-      }
-    }
-    s = strtok(nullptr, "=");
-  }
-
-  return true;
+  return parse_instancing_spec(arg, subset_main->face, subset_main->input, error);
 }
 #endif
 
@@ -841,6 +821,7 @@ parse_file_for (const char *name,
       g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_FAILED,
 		   "Failed reading file `%s': %s",
 		   arg, strerror (errno));
+      fclose (fp);
       return false;
     }
     g_string_append_c (gs, '\0');
@@ -859,7 +840,9 @@ parse_file_for (const char *name,
   }
   while (!feof (fp));
 
-  g_string_free (gs, false);
+  g_string_free (gs, true);
+
+  fclose (fp);
 
   return true;
 }
@@ -902,7 +885,8 @@ subset_main_t::collect_rest (const char *name,
 void
 subset_main_t::add_options ()
 {
-  set_summary ("Subset fonts to specification.");
+  set_summary ("Subset font to specification.");
+  set_description ("Subsets font file to a specified set of glyphs, Unicode codepoints, or text, design-space limiting, and other reductions.");
 
   face_options_t::add_options (this);
 
@@ -971,14 +955,15 @@ subset_main_t::add_options ()
     {"drop-tables+",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_drop_tables,	"Drop the specified tables.", "list of string table tags or *"},
     {"drop-tables-",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_drop_tables,	"Drop the specified tables.", "list of string table tags or *"},
 #ifndef HB_NO_VAR
-    {"instance",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_instance,
-     "(Partially|Fully) Instantiate a variable font. A location consists of the tag of a variation axis, followed by '=', followed by a\n"
-     "number or the literal string 'drop'\n"
-     "                                                        "
-     "For example: --instance=\"wdth=100 wght=200\" or --instance=\"wdth=drop\"\n"
-     "                                                        "
-     "Note: currently only fully instancing is supported\n",
-     "list of comma separated axis-locations"},
+     {"variations",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_instance,
+     "(Partially|Fully) Instantiate a variable font. A location consists of the tag "
+     "of a variation axis, followed by '=', followed by a number or the literal "
+     "string 'drop'. For example: --variations=\"wdth=100 wght=200\" or --variations=\"wdth=drop\""
+     ,
+     "list of comma separated axis-locations."
+     },
+     {"instance",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_instance,
+     "Alias for --variations.", "list of comma separated axis-locations"},
 #endif
     {nullptr}
   };
@@ -1000,12 +985,18 @@ subset_main_t::add_options ()
     {"notdef-outline",		0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_NOTDEF_OUTLINE>,		"Keep the outline of \'.notdef\' glyph", nullptr},
     {"no-prune-unicode-ranges",	0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_NO_PRUNE_UNICODE_RANGES>,	"Don't change the 'OS/2 ulUnicodeRange*' bits.", nullptr},
     {"no-layout-closure",	0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_NO_LAYOUT_CLOSURE>,	"Don't perform glyph closure for layout substitution (GSUB).", nullptr},
+    {"no-bidi-closure",	        0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_NO_BIDI_CLOSURE>,	"Don't perform bidi closure (adding mirrored variants) for input codepoints.", nullptr},
     {"glyph-names",		0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_GLYPH_NAMES>,		"Keep PS glyph names in TT-flavored fonts. ", nullptr},
     {"passthrough-tables",	0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_PASSTHROUGH_UNRECOGNIZED>,	"Do not drop tables that the tool does not know how to subset.", nullptr},
     {"preprocess-face",		0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &this->preprocess,
      "Alternative name for --preprocess.", nullptr},
     {"preprocess",		0, 0, G_OPTION_ARG_NONE, &this->preprocess,
      "If set preprocesses the face with the add accelerator option before actually subsetting.", nullptr},
+#ifdef HB_EXPERIMENTAL_API
+    {"iftb-requirements",	0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_IFTB_REQUIREMENTS>,	"Enforce requirements needed to use the subset with incremental font transfer IFTB patches.", nullptr},
+    {"retain-num-glyphs",	0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_RETAIN_NUM_GLYPHS>,	"When retain gids is set also don't change the number of glyphs in the input font.", nullptr},
+#endif
+    {"optimize",		0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_OPTIMIZE_IUP_DELTAS>,	"Perform IUP delta optimization on the resulting gvar table's deltas", nullptr},
     {nullptr}
   };
   add_group (flag_entries,

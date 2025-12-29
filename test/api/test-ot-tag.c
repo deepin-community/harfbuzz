@@ -223,7 +223,7 @@ test_language_two_way (const char *tag_s, const char *lang_s)
     g_assert_cmphex (tag, ==, tag2);
   else
     g_assert_cmphex (tag, ==, HB_TAG_CHAR4 ("dflt"));
-  g_assert (lang == hb_ot_tag_to_language (tag));
+  g_assert_true (lang == hb_ot_tag_to_language (tag));
 }
 
 static void
@@ -254,7 +254,7 @@ test_tag_to_language (const char *tag_s, const char *lang_s)
 
   g_test_message ("Testing tag %s -> language %s", tag_s, lang_s);
 
-  g_assert (lang == hb_ot_tag_to_language (tag));
+  g_assert_true (lang == hb_ot_tag_to_language (tag));
 }
 
 static void
@@ -419,7 +419,8 @@ test_ot_tag_language (void)
   test_language_two_way ("KGE", "und-Geok");
 
   /* Irish Traditional */
-  test_language_two_way ("IRT", "ga-Latg");
+  test_tag_from_language ("IRT", "ga-Latg");
+  test_language_two_way ("IRT", "ghc");
 
   /* Moldavian */
   test_language_two_way ("MOL", "ro-MD");
@@ -510,8 +511,8 @@ test_tags (hb_script_t  script,
   hb_tag_t *script_tags = malloc (script_count * sizeof (hb_tag_t));
   hb_tag_t *language_tags = malloc (language_count * sizeof (hb_tag_t));
   hb_language_t lang;
-  g_assert (script_tags);
-  g_assert (language_tags);
+  g_assert_true (script_tags);
+  g_assert_true (language_tags);
   lang = hb_language_from_string (lang_s, -1);
   va_start (expected_tags, expected_language_count);
 
