@@ -1,3 +1,10 @@
+harfbuzz (10.2.0-1deepin1) unstable; urgency=medium
+
+  * Fix CVE-2026-22693: NULL pointer dereference in
+    SubtableUnicodesCache::create
+
+ -- deepin-ci-robot <packages@deepin.org>  Thu, 07 May 2026 00:58:52 +0800
+
 harfbuzz (10.2.0-1) unstable; urgency=medium
 
   * New upstream version 10.2.0
