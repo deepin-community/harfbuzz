@@ -1,0 +1,24 @@
+Description: Create man pages with useful whatis entry
+Author: أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>
+Forwarded: https://github.com/harfbuzz/harfbuzz/pull/5521
+
+Index: harfbuzz/util/meson.build
+===================================================================
+--- harfbuzz.orig/util/meson.build	2026-02-18 02:35:01.130178969 +0100
++++ harfbuzz/util/meson.build	2026-02-18 23:13:01.437166994 +0100
+@@ -21,7 +21,7 @@
+ else
+   help2man = disabler()
+ endif
+-help2man_command = [help2man, '--help-option=--help-all', '--no-info', '--output=' + '@OUTPUT@', '@INPUT@']
++help2man_command = ['sh', '-c', help2man.full_path() + ' --help-option=--help-all --no-info -n "$(@INPUT@ --help | head -n 4 | tail -n 1)" --output=@INPUT@.1 @INPUT@']
+ help2man_env = environment()
+ help2man_env.set('HB_UTIL_HELP_VERBOSE', '1')
+ 
+@@ -111,4 +111,4 @@
+   # Disable tests that use this
+   hb_shape = disabler()
+   hb_subset = disabler()
+-endif
+\ No newline at end of file
++endif

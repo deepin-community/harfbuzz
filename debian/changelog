@@ -1,3 +1,95 @@
+harfbuzz (12.3.2-2) unstable; urgency=medium
+
+  * fix-man-whatis.patch: use sh -c around help2man to do shell expansion
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Wed, 18 Feb 2026 23:37:46 +0100
+
+harfbuzz (12.3.2-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Thu, 29 Jan 2026 19:20:40 +0100
+
+harfbuzz (12.3.1-1) unstable; urgency=medium
+
+  * New upstream release
+  * Dropped fix-CVE-2026-22693.patch, applied upstream
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Sat, 24 Jan 2026 19:14:23 +0100
+
+harfbuzz (12.3.0-4) unstable; urgency=medium
+
+  * Update copyright years
+  * Add fix-CVE-2026-22693.patch to fix CVE-2026-22693 (Closes: #1125189)
+  * d/control: Drop redundant Priority: optional
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Sat, 10 Jan 2026 20:27:23 +0100
+
+harfbuzz (12.3.0-3) unstable; urgency=medium
+
+  * d/control: drop dh-sequence-movetousr from build-deps (again!)
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Wed, 07 Jan 2026 01:34:42 +0100
+
+harfbuzz (12.3.0-2) unstable; urgency=medium
+
+  * d/libharfbuzz0-udeb.install: install in /usr/lib (Closes: #1124592)
+  * Remove d/libharfbuzz-gobject0.lintian-overrides, as it overrides an
+    obsolete tag
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Wed, 07 Jan 2026 01:32:10 +0100
+
+harfbuzz (12.3.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * d/control:
+    + bump standards version to 4.7.3
+    + d/control: add dh-sequence-movetousr to build-deps again
+      (Closes: #1124592)
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Sat, 03 Jan 2026 16:17:33 +0100
+
+harfbuzz (12.2.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * d/control: drop dh-sequence-movetousr from build-deps (Closes: #1122764)
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Fri, 12 Dec 2025 17:49:44 +0100
+
+harfbuzz (12.1.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Drop redundant Rules-Requires-Root field
+  * d/libharfbuzz0b.symbols: update symbols
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Wed, 01 Oct 2025 16:54:22 +0200
+
+harfbuzz (11.5.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * d/libharfbuzz-gobject0.lintian-overrides: add wildcards for arch & lib
+    version
+  * d/control: update build-dep: libgirepository1.0-dev =>
+    gobject-introspection (>= 1.80)
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Wed, 17 Sep 2025 16:13:26 +0200
+
+harfbuzz (11.4.5-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #1112316)
+  * d/control:
+    + add dh-sequence-movetousr to build-deps
+    + add help2man to build deps
+    + update standards version to 4.7.2
+  * d/libharfbuzz-bin.install: install utilties' man pages
+  * d/libharfbuzz0b.symbols: update symbols
+  * d/copyright: remove obsolete files
+  * Add d/libharfbuzz-bin.lintian-overrides
+  * Add d/libharfbuzz-gobject0.lintian-overrides
+  * Add fix-man-whatis.patch to create man pages with useful whatis entry
+
+ -- أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>  Tue, 02 Sep 2025 16:48:20 +0200
+
 harfbuzz (10.2.0-1) unstable; urgency=medium
 
   * New upstream version 10.2.0

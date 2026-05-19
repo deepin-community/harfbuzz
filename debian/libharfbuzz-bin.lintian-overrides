@@ -1,0 +1,2 @@
+# 'ot' is the name of a font loader:
+libharfbuzz-bin: typo-in-manual-page ot to [usr/share/man/man1/*]
