@@ -86,6 +86,7 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_buffer_set_segment_properties@Base 0.9.9
  hb_buffer_set_unicode_funcs@Base 0.6.0
  hb_buffer_set_user_data@Base 0.6.0
+ hb_calloc@Base 11.0.0
  hb_color_get_alpha@Base 2.5.3
  hb_color_get_blue@Base 2.5.3
  hb_color_get_green@Base 2.5.3
@@ -123,7 +124,9 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_face_create@Base 0.6.0
  hb_face_create_for_tables@Base 0.6.0
  hb_face_create_from_file_or_fail@Base 10.1.0
+ hb_face_create_from_file_or_fail_using@Base 11.0.0
  hb_face_create_or_fail@Base 10.1.0
+ hb_face_create_or_fail_using@Base 11.0.0
  hb_face_destroy@Base 0.6.0
  hb_face_get_empty@Base 0.6.0
  hb_face_get_glyph_count@Base 0.9.9
@@ -132,6 +135,7 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_face_get_upem@Base 0.6.0
  hb_face_get_user_data@Base 0.6.0
  hb_face_is_immutable@Base 0.6.0
+ hb_face_list_loaders@Base 11.0.0
  hb_face_make_immutable@Base 0.6.0
  hb_face_reference@Base 0.6.0
  hb_face_reference_blob@Base 0.9.4
@@ -149,6 +153,7 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_font_create_sub_font@Base 0.6.0
  hb_font_destroy@Base 0.6.0
  hb_font_draw_glyph@Base 7.3.0
+ hb_font_draw_glyph_or_fail@Base 11.2.1
  hb_font_funcs_create@Base 0.6.0
  hb_font_funcs_destroy@Base 0.6.0
  hb_font_funcs_get_empty@Base 0.6.0
@@ -157,6 +162,7 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_font_funcs_make_immutable@Base 0.6.0
  hb_font_funcs_reference@Base 0.6.0
  hb_font_funcs_set_draw_glyph_func@Base 7.3.0
+ hb_font_funcs_set_draw_glyph_or_fail_func@Base 11.2.1
  hb_font_funcs_set_font_h_extents_func@Base 1.2.6
  hb_font_funcs_set_font_v_extents_func@Base 1.2.6
  hb_font_funcs_set_glyph_contour_point_func@Base 0.6.0
@@ -167,15 +173,18 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_font_funcs_set_glyph_h_advances_func@Base 1.8.6
  hb_font_funcs_set_glyph_h_kerning_func@Base 0.6.0
  hb_font_funcs_set_glyph_h_origin_func@Base 0.6.0
+ hb_font_funcs_set_glyph_h_origins_func@Base 11.3.0
  hb_font_funcs_set_glyph_name_func@Base 0.9.4
  hb_font_funcs_set_glyph_shape_func@Base 5.1.0
  hb_font_funcs_set_glyph_v_advance_func@Base 0.6.0
  hb_font_funcs_set_glyph_v_advances_func@Base 1.8.6
  hb_font_funcs_set_glyph_v_kerning_func@Base 0.6.0
  hb_font_funcs_set_glyph_v_origin_func@Base 0.6.0
+ hb_font_funcs_set_glyph_v_origins_func@Base 11.3.0
  hb_font_funcs_set_nominal_glyph_func@Base 1.2.6
  hb_font_funcs_set_nominal_glyphs_func@Base 2.1.1
  hb_font_funcs_set_paint_glyph_func@Base 7.3.0
+ hb_font_funcs_set_paint_glyph_or_fail_func@Base 11.2.1
  hb_font_funcs_set_user_data@Base 0.6.0
  hb_font_funcs_set_variation_glyph_func@Base 1.2.6
  hb_font_get_empty@Base 0.6.0
@@ -193,6 +202,7 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_font_get_glyph_h_advances@Base 1.8.6
  hb_font_get_glyph_h_kerning@Base 0.6.0
  hb_font_get_glyph_h_origin@Base 0.6.0
+ hb_font_get_glyph_h_origins@Base 11.3.0
  hb_font_get_glyph_kerning_for_direction@Base 0.6.0
  hb_font_get_glyph_name@Base 0.9.4
  hb_font_get_glyph_origin_for_direction@Base 0.6.0
@@ -201,6 +211,7 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_font_get_glyph_v_advances@Base 1.8.6
  hb_font_get_glyph_v_kerning@Base 0.6.0
  hb_font_get_glyph_v_origin@Base 0.6.0
+ hb_font_get_glyph_v_origins@Base 11.3.0
  hb_font_get_h_extents@Base 1.2.6
  hb_font_get_nominal_glyph@Base 1.2.6
  hb_font_get_nominal_glyphs@Base 2.6.3
@@ -220,12 +231,16 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_font_glyph_from_string@Base 0.9.4
  hb_font_glyph_to_string@Base 0.9.4
  hb_font_is_immutable@Base 0.6.0
+ hb_font_is_synthetic@Base 11.2.1
+ hb_font_list_funcs@Base 11.0.0
  hb_font_make_immutable@Base 0.6.0
  hb_font_paint_glyph@Base 7.3.0
+ hb_font_paint_glyph_or_fail@Base 11.2.1
  hb_font_reference@Base 0.6.0
  hb_font_set_face@Base 1.5.1
  hb_font_set_funcs@Base 0.6.0
  hb_font_set_funcs_data@Base 0.9.4
+ hb_font_set_funcs_using@Base 11.0.0
  hb_font_set_parent@Base 1.2.6
  hb_font_set_ppem@Base 0.6.0
  hb_font_set_ptem@Base 1.6.0
@@ -239,14 +254,17 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_font_set_variation@Base 7.1.0
  hb_font_set_variations@Base 1.4.2
  hb_font_subtract_glyph_origin_for_direction@Base 0.6.0
+ hb_free@Base 11.0.0
  hb_ft_face_create@Base 0.6.0
  hb_ft_face_create_cached@Base 0.6.0
+ hb_ft_face_create_from_blob_or_fail@Base 11.0.0
  hb_ft_face_create_from_file_or_fail@Base 10.1.0
  hb_ft_face_create_referenced@Base 0.9.38
  hb_ft_font_changed@Base 1.6.0
  hb_ft_font_create@Base 0.6.0
  hb_ft_font_create_referenced@Base 0.9.38
  hb_ft_font_get_face@Base 0.9.4
+ hb_ft_font_get_ft_face@Base 10.4.0
  hb_ft_font_get_load_flags@Base 1.2.6
  hb_ft_font_lock_face@Base 2.6.5
  hb_ft_font_set_funcs@Base 0.9.4
@@ -264,6 +282,7 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_language_get_default@Base 0.6.0
  hb_language_matches@Base 5.1.0
  hb_language_to_string@Base 0.6.0
+ hb_malloc@Base 11.0.0
  hb_map_allocation_successful@Base 1.7.7
  hb_map_clear@Base 1.7.7
  hb_map_copy@Base 5.1.0
@@ -327,6 +346,7 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_ot_layout_language_get_feature_tags@Base 0.6.0
  hb_ot_layout_language_get_required_feature@Base 0.9.30
  hb_ot_layout_language_get_required_feature_index@Base 0.6.0
+ hb_ot_layout_lookup_collect_glyph_alternates@Base 12.1.0
  hb_ot_layout_lookup_collect_glyphs@Base 0.9.9
  hb_ot_layout_lookup_get_glyph_alternates@Base 2.7.4
  hb_ot_layout_lookup_get_optical_bound@Base 5.3.1
@@ -367,6 +387,7 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_ot_name_list_names@Base 2.1.1
  hb_ot_shape_glyphs_closure@Base 0.9.4
  hb_ot_shape_plan_collect_lookups@Base 0.9.9
+ hb_ot_shape_plan_get_feature_tags@Base 10.3.0
  hb_ot_tag_from_language@Base 0.6.0
  hb_ot_tag_to_language@Base 0.6.0
  hb_ot_tag_to_script@Base 0.6.0
@@ -417,10 +438,13 @@ libharfbuzz.so.0 libharfbuzz0b #MINVER#
  hb_paint_pop_transform@Base 7.3.0
  hb_paint_push_clip_glyph@Base 7.3.0
  hb_paint_push_clip_rectangle@Base 7.3.0
+ hb_paint_push_font_transform@Base 11.0.0
  hb_paint_push_group@Base 7.3.0
+ hb_paint_push_inverse_font_transform@Base 11.0.0
  hb_paint_push_transform@Base 7.3.0
  hb_paint_radial_gradient@Base 7.3.0
  hb_paint_sweep_gradient@Base 7.3.0
+ hb_realloc@Base 11.0.0
  hb_script_from_iso15924_tag@Base 0.6.0
  hb_script_from_string@Base 0.6.0
  hb_script_get_horizontal_direction@Base 0.6.0
