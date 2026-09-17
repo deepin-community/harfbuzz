@@ -1,9 +1,3 @@
-harfbuzz (12.3.2-3) unstable; urgency=medium
-
-  * Rebuild with LTO enabled (dpkg vendor feature optimize/lto).
-
- -- tunaichao <tunaichao@uniontech.com>  Fri, 11 Sep 2026 15:09:37 +0800
-
 harfbuzz (12.3.2-2) unstable; urgency=medium
 
   * fix-man-whatis.patch: use sh -c around help2man to do shell expansion
