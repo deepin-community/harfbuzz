@@ -1,3 +1,12 @@
+harfbuzz (12.3.2-2deepin2) unstable; urgency=medium
+
+  * fix(cve): CVE-2026-113679 (high) - [wasm] Fix font_glyph_to_string
+    buffer bounds check   Upstream:
+    https://github.com/harfbuzz/harfbuzz/commit/5e821de8256d01780566b5c8
+    ab7886fae4c93da8
+
+ -- deepin-ci-robot <packages@deepin.org>  Wed, 21 Oct 2026 10:04:18 +0800
+
 harfbuzz (12.3.2-2deepin1) unstable; urgency=medium
 
   * Rebuild with LTO enabled (dpkg vendor feature optimize/lto).
