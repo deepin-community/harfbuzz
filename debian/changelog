@@ -4,6 +4,10 @@ harfbuzz (12.3.2-2deepin2) unstable; urgency=medium
     buffer bounds check   Upstream:
     https://github.com/harfbuzz/harfbuzz/commit/5e821de8256d01780566b5c8
     ab7886fae4c93da8
+  * fix(cve): CVE-2026-113680 (medium) - [wasm] Don't pass unvalidated
+    guest pointers to host functions   Upstream:
+    https://github.com/harfbuzz/harfbuzz/commit/a71aa86c2bac114fafb6b47f
+    8da02024ecb44fa6
 
  -- deepin-ci-robot <packages@deepin.org>  Wed, 21 Oct 2026 10:04:18 +0800
 
